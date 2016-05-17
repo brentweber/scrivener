@@ -45,6 +45,7 @@ defmodule Scrivener do
   """
 
   import Ecto.Query
+  require Logger
 
   alias Scrivener.Config
   alias Scrivener.Page
@@ -93,7 +94,8 @@ defmodule Scrivener do
       |> Scrivener.paginate(config)
   """
   @spec paginate(Ecto.Query.t, Scrivener.Config.t) :: Scrivener.Page.t
-  def paginate(query, %Config{page_size: page_size, page_number: page_number, repo: repo}) do
+  def paginate(query, %Config{page_size: page_size, page_number: page_number, repo: repo} = config) do
+    Logger.debug "scrivener config #{inspect config}"
     total_entries = total_entries(query, repo)
 
     %Page{
@@ -152,6 +154,7 @@ defmodule Scrivener do
   defp total_entries(query, repo) do
     query
     |> exclude(:order_by)
+    |> exclude(:group_by)
     |> exclude(:preload)
     |> exclude(:select)
     |> select([_], count("*"))
